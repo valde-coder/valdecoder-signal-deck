@@ -25,9 +25,9 @@ const DEFAULT_FX: FxSettings = {
   density: 2400,
   turb: 1,
   speed: 1,
-  size: 2.2,
+  size: 1,
   bloom: 0.85,
-  bloomOn: true,
+  bloomOn: false,
   fov: 62,
   orbit: true,
 };
