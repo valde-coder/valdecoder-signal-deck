@@ -2643,6 +2643,65 @@ function About() {
   );
 }
 
+/* ---------------- decode bar ---------------- */
+
+const DECODE_TOPICS = [
+  { id: "sistemas", label: "sistemas distribuídos", icon: "⚡" },
+  { id: "web", label: "shaders GLSL & WebGL", icon: "✦" },
+  { id: "hardware", label: "homelab & firmware", icon: "🖲️" },
+  { id: "ia", label: "IA rodando local", icon: "🧠" },
+  { id: "seg", label: "segurança & kernel", icon: "🛡️" },
+];
+
+function DecodeBar() {
+  const [topicIdx, setTopicIdx] = useState(0);
+  const [displayText, setDisplayText] = useState(DECODE_TOPICS[0].label);
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setTopicIdx((prev) => (prev + 1) % DECODE_TOPICS.length);
+    }, 3800);
+    return () => clearInterval(iv);
+  }, []);
+
+  useEffect(() => {
+    const target = DECODE_TOPICS[topicIdx].label;
+    const chars = "!<>-_\\/[]{}—=+*^?#________";
+    let iteration = 0;
+    let frame = 0;
+
+    const scramble = () => {
+      const result = target
+        .split("")
+        .map((char, index) => {
+          if (index < iteration) return target[index];
+          return chars[Math.floor(Math.random() * chars.length)];
+        })
+        .join("");
+      setDisplayText(result);
+
+      if (iteration < target.length) {
+        iteration += 0.6;
+        frame = requestAnimationFrame(scramble);
+      }
+    };
+
+    scramble();
+    return () => cancelAnimationFrame(frame);
+  }, [topicIdx]);
+
+  return (
+    <div className="hero-decode-bar">
+      <span className="hero-decode-prompt">&gt; agora_decodificando:</span>
+      <span className="hero-decode-val">{displayText}</span>
+      <span className="hero-decode-cursor">_</span>
+      <span className="hero-decode-icon" aria-hidden="true">
+        {DECODE_TOPICS[topicIdx].icon}
+      </span>
+    </div>
+  );
+}
+
 /* ---------------- footer ---------------- */
 
 function Footer() {
@@ -2656,6 +2715,7 @@ function Footer() {
     <footer id="contato" className="ftr" ref={ftrRef}>
       <div className="ftr-contact-wrap">
         <div className="rv">
+          <DecodeBar />
           <p className="ftr-kicker">contato</p>
           <div className="ftr-contact-row">
             <h2 className="ftr-heading">

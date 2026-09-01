@@ -33,14 +33,6 @@ function scrambleText(el: HTMLElement, text: string, reduced: boolean): () => vo
   return () => window.clearInterval(iv);
 }
 
-const TOPICS = [
-  { id: "sistemas", label: "sistemas distribuídos", icon: "⚡" },
-  { id: "web", label: "shaders GLSL & WebGL", icon: "✦" },
-  { id: "hardware", label: "homelab & firmware", icon: "🖲️" },
-  { id: "ia", label: "IA rodando local", icon: "🧠" },
-  { id: "seg", label: "segurança & kernel", icon: "🛡️" },
-];
-
 function useHeroClock() {
   const formatter = useMemo(
     () =>
@@ -77,9 +69,7 @@ export default function HeroStage({
 }: HeroStageProps) {
   const root = useRef<HTMLElement>(null);
   const titleBoxRef = useRef<HTMLHeadingElement>(null);
-  const decodeRef = useRef<HTMLSpanElement>(null);
   const clock = useHeroClock();
-  const [topicIdx, setTopicIdx] = useState(0);
   const [pulseCount, setPulseCount] = useState(0);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
 
@@ -89,22 +79,6 @@ export default function HeroStage({
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     [],
   );
-
-  // Rotate decode phrase
-  useEffect(() => {
-    if (reduced) return;
-    const iv = window.setInterval(() => {
-      setTopicIdx((prev) => (prev + 1) % TOPICS.length);
-    }, 3800);
-    return () => window.clearInterval(iv);
-  }, [reduced]);
-
-  // Scramble text effect on topic change
-  useEffect(() => {
-    if (!decodeRef.current) return;
-    const cancel = scrambleText(decodeRef.current, TOPICS[topicIdx].label, reduced);
-    return cancel;
-  }, [topicIdx, reduced]);
 
   // Interactive subtle 3D tilt on hero content
   useEffect(() => {
@@ -341,18 +315,6 @@ export default function HeroStage({
             CODER
           </span>
         </h1>
-
-        {/* Barra de decodificação dinâmica com Scramble */}
-        <div className="hero-decode-bar hero-animate">
-          <span className="hero-decode-prompt">&gt; agora_decodificando:</span>
-          <span className="hero-decode-val" ref={decodeRef}>
-            {TOPICS[0].label}
-          </span>
-          <span className="hero-decode-cursor">_</span>
-          <span className="hero-decode-icon" aria-hidden="true">
-            {TOPICS[topicIdx].icon}
-          </span>
-        </div>
 
         {/* Texto descritivo / Manifesto */}
         <p className="hero-copy hero-animate">
