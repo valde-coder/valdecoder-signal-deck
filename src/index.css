@@ -534,10 +534,10 @@ button {
   z-index: 1;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(68px, 10.5vw, 146px);
+  font-size: clamp(3.2rem, 11vw, 8.5rem);
   font-weight: 900;
-  line-height: 0.76;
-  letter-spacing: -0.055em;
+  line-height: 0.92;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
   user-select: none;
 }
@@ -545,6 +545,9 @@ button {
 .hero-title-v4 > span {
   display: block;
   width: fit-content;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: -0.025em;
 }
 
 .hero-word-valde {
@@ -553,7 +556,7 @@ button {
 
 .hero-word-coder {
   color: transparent;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
   -webkit-text-stroke: 1.8px var(--volt);
   text-stroke: 1.8px var(--volt);
 }
@@ -2744,7 +2747,9 @@ button {
     width: calc(100% - 56px);
   }
   .hero-title-v4 {
-    font-size: clamp(58px, 15vw, 108px);
+    font-size: clamp(3.2rem, 11vw, 8.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
   }
   .nav {
     display: none;
@@ -2803,11 +2808,12 @@ button {
     letter-spacing: 0.22em;
   }
   .hero-title-v4 {
-    font-size: clamp(54px, 18vw, 96px);
-    line-height: 0.8;
+    font-size: clamp(2.8rem, 14vw, 5.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
   }
   .hero-word-coder {
-    -webkit-text-stroke-width: 1.25px;
+    -webkit-text-stroke-width: 1.5px;
   }
   .hero-copy {
     margin-top: 27px;
