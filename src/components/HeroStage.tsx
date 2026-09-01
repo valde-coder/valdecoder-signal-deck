@@ -331,10 +331,7 @@ export default function HeroStage({
             onMouseMove={handleMagnetic}
             onMouseLeave={handleMagneticReset}
           >
-            <span className="hero-btn-content">
-              <span>Explorar o Radar</span>
-              <span className="hero-btn-badge">14 sinais</span>
-            </span>
+            <span>Entrar no radar</span>
             <span className="hero-arrow" aria-hidden="true">↗</span>
           </a>
 
