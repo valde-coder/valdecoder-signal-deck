@@ -555,10 +555,10 @@ button {
 }
 
 .hero-word-coder {
-  color: transparent;
+  color: var(--volt);
   letter-spacing: -0.025em;
-  -webkit-text-stroke: 1.8px var(--volt);
-  text-stroke: 1.8px var(--volt);
+  -webkit-text-stroke: 0;
+  text-stroke: 0;
 }
 
 .hero-copy {
@@ -2811,9 +2811,6 @@ button {
     font-size: clamp(2.8rem, 14vw, 5.5rem);
     line-height: 0.92;
     letter-spacing: -0.025em;
-  }
-  .hero-word-coder {
-    -webkit-text-stroke-width: 1.5px;
   }
   .hero-copy {
     margin-top: 27px;
