@@ -43,11 +43,6 @@ const FX_PRESETS: Record<string, { label: string; icon: string; fx: Partial<FxSe
     icon: "🟢",
     fx: { density: 2400, turb: 1, speed: 1, size: 1, bloom: 0.85, bloomOn: false, fov: 62, orbit: true },
   },
-  hyperdrive: {
-    label: "Hiperdrive",
-    icon: "⚡",
-    fx: { density: 3400, turb: 1.8, speed: 1.8, size: 1.5, bloom: 1.3, bloomOn: true, fov: 72, orbit: true },
-  },
   nebula: {
     label: "Nebulosa",
     icon: "🌌",
@@ -1422,8 +1417,6 @@ export default function App() {
       {god && <div className="god-badge">GOD MODE ∞</div>}
 
       <Header
-        crt={crt}
-        onCrt={toggleCrt}
         menuOpen={menuOpen}
         onMenu={(v) => setMenuOpen(v)}
         onOpenCmd={() => setCmdOpen(true)}
@@ -1515,14 +1508,10 @@ export default function App() {
 /* ---------------- header ---------------- */
 
 function Header({
-  crt,
-  onCrt,
   menuOpen,
   onMenu,
   onOpenCmd,
 }: {
-  crt: boolean;
-  onCrt: () => void;
   menuOpen: boolean;
   onMenu: (v: boolean) => void;
   onOpenCmd: () => void;
@@ -1615,12 +1604,6 @@ function Header({
           </nav>
 
           <div className="hdr-right">
-            {/* Indicador de status online com ponto de pulso */}
-            <span className="hdr-online">
-              <span className="hdr-online-dot" />
-              online
-            </span>
-
             {/* Botão do YouTube substituindo o relógio de SP */}
             <a
               href="https://www.youtube.com/@valdecoder"
@@ -1636,27 +1619,14 @@ function Header({
             <button
               className="hdr-cmd-trigger"
               onClick={onOpenCmd}
+              aria-label="Abrir busca no Deck (Ctrl + K)"
               title="Buscar no Deck (Ctrl + K)"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-              <span>buscar...</span>
               <kbd>Ctrl+K</kbd>
-            </button>
-
-            <button
-              className={`icon-btn${crt ? " on" : ""}`}
-              onClick={onCrt}
-              aria-pressed={crt}
-              title="alternar modo CRT (scanlines)"
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-                <rect x="2.5" y="5" width="19" height="13" rx="2" />
-                <path d="M5 9h14M5 12.5h14" />
-                <path d="M9 21h6" />
-              </svg>
             </button>
 
             <button
@@ -2708,9 +2678,28 @@ function FxPanel({
   onPreset: (key: string) => void;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const [footerVisible, setFooterVisible] = useState(false);
   const [open, setOpen] = useState(
     () => typeof window === "undefined" || window.innerWidth >= 860
   );
+
+  useEffect(() => {
+    const footer = document.getElementById("contato");
+    if (!footer) return;
+
+    const syncFooterVisibility = () => {
+      const rect = footer.getBoundingClientRect();
+      setFooterVisible(rect.top < window.innerHeight && rect.bottom > 0);
+    };
+
+    syncFooterVisibility();
+    window.addEventListener("scroll", syncFooterVisibility, { passive: true });
+    window.addEventListener("resize", syncFooterVisibility);
+    return () => {
+      window.removeEventListener("scroll", syncFooterVisibility);
+      window.removeEventListener("resize", syncFooterVisibility);
+    };
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 860px)");
@@ -2815,7 +2804,11 @@ function FxPanel({
   );
 
   return (
-    <div className="fx-panel" ref={panelRef}>
+    <div
+      className={`fx-panel${footerVisible ? " is-footer-hidden" : ""}`}
+      ref={panelRef}
+      aria-hidden={footerVisible}
+    >
       <button className="fx-head" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         <span>fx_deck {open ? "▾" : "▸"}</span>
         <span className="led" />

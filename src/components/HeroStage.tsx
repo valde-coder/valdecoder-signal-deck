@@ -312,7 +312,6 @@ export default function HeroStage({
           >
             <span className="hero-play-icon" aria-hidden="true">▶</span>
             <span>Assistir EP 042: Shaders GLSL</span>
-            <span className="hero-dur-tag">41min</span>
           </button>
         </div>
       </div>
