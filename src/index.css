@@ -1142,7 +1142,10 @@ button {
   --radar-volt: #ffd91c;
   --radar-mint: #3be08f;
   max-width: 1280px;
-  padding: 112px 40px 30px;
+  padding-top: var(--space-sec-top);
+  padding-bottom: var(--space-sec-bottom);
+  padding-left: 40px;
+  padding-right: 40px;
   background: var(--radar-ink);
   color: var(--radar-bone);
   font-family: "Space Grotesk Backup", "Space Grotesk", sans-serif;
@@ -1164,47 +1167,27 @@ button {
 }
 
 .radar-section-head {
-  margin-bottom: 40px;
+  margin-bottom: var(--space-head-gap);
 }
 
-.radar-head-rule {
+.radar-backup .radar-section-head {
+  margin-bottom: 16px;
+}
+
+.radar-title-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  font-family: var(--font-mono);
+  justify-content: space-between;
+  gap: 24px;
 }
 
-.radar-head-rule > span {
-  color: var(--radar-volt);
-  font-size: 12px;
-  letter-spacing: 0.3em;
-}
-
-.radar-head-rule > i {
-  height: 1px;
-  flex: 1;
-  background: var(--radar-line);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.12s;
-}
-
-.radar-section-head.in .radar-head-rule > i {
-  transform: scaleX(1);
-}
-
-.radar-head-rule > small {
-  max-width: 300px;
-  color: var(--radar-fog);
-  font-size: 10px;
-  line-height: 1.7;
-  letter-spacing: 0.2em;
-  text-align: right;
-  text-transform: uppercase;
+.radar-title-row > .radar-glyph-wrap {
+  flex: none;
+  margin-top: 0;
 }
 
 .radar-section-head h2 {
-  margin: 20px 0 0;
+  margin: 0;
   font-family: var(--font-display);
   font-size: clamp(32px, 5vw, 48px);
   font-weight: 700;
@@ -1546,7 +1529,7 @@ button {
 
 @media (max-width: 900px) {
   .radar-card-grid { grid-template-columns: 1fr; }
-  .radar-head-rule > small { display: none; }
+  .radar-title-row .radar-glyph-svg { width: 112px; height: 112px; }
   .radar-pipeline-flow { flex-direction: column; align-items: stretch; }
   .radar-connector { width: 100%; height: 40px; }
   .radar-connector svg { position: absolute; left: 50%; top: 16px; width: 40px; transform: translateX(-50%) rotate(90deg); }
@@ -1558,9 +1541,11 @@ button {
 }
 
 @media (max-width: 640px) {
-  .radar-backup { padding: 84px 20px 24px; }
+  .radar-backup { padding-inline: 16px; }
   .radar-filter-row { align-items: flex-start; }
   .radar-backup .radar-head-visual { display: none; }
+  .radar-title-row { gap: 12px; }
+  .radar-title-row .radar-glyph-svg { width: 88px; height: 88px; }
   .radar-filters button { padding: 7px 11px; font-size: 10px; }
   .radar-card-top { flex-direction: column; }
   .radar-pipeline { padding: 20px; }
@@ -2017,10 +2002,13 @@ button {
 .about-backup {
   position: relative;
   z-index: 10;
-  scroll-margin-top: 80px;
+  scroll-margin-top: 72px;
   border-top: 1px solid #26282e;
   background: rgba(16, 17, 20, 0.82);
-  padding: 112px 0;
+  padding-top: var(--space-sec-top);
+  padding-bottom: var(--space-sec-bottom);
+  padding-left: 0;
+  padding-right: 0;
   color: #ededef;
   font-family: "Space Grotesk Backup", "Space Grotesk", sans-serif;
 }
@@ -2028,7 +2016,7 @@ button {
 .about-backup-inner {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 clamp(16px, 3vw, 40px);
 }
 
 .about-backup .rv {
@@ -2043,40 +2031,10 @@ button {
 }
 
 .about-head {
-  margin-bottom: 56px;
-}
-
-.about-head-line {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-family: var(--font-mono);
-}
-
-.about-head-line > span {
-  color: var(--volt);
-  font-size: 12px;
-  letter-spacing: 0.3em;
-}
-
-.about-head-line > i {
-  height: 1px;
-  flex: 1;
-  background: #26282e;
-}
-
-.about-head-line > small {
-  max-width: 300px;
-  color: #8a8f98;
-  font-size: 10px;
-  line-height: 1.7;
-  letter-spacing: 0.2em;
-  text-align: right;
-  text-transform: uppercase;
+  margin-bottom: var(--space-head-gap);
 }
 
 .about-head h2 {
-  margin: 20px 0 0;
   font-family: var(--font-display);
   font-size: clamp(30px, 5vw, 48px);
   font-weight: 700;
@@ -2318,10 +2276,8 @@ button {
 }
 
 @media (max-width: 640px) {
-  .about-backup { padding: 80px 0; }
-  .about-backup-inner { padding: 0 20px; }
-  .about-head-line > small { display: none; }
-  .about-layout { gap: 48px; }
+  .about-backup-inner { padding: 0 16px; }
+  .about-layout { gap: 36px; }
   .about-badge { display: none; }
   .about-facts { grid-template-columns: repeat(2, 1fr); }
 }
@@ -2331,16 +2287,20 @@ button {
 .ftr {
   position: relative;
   z-index: 10;
-  margin-top: 100px;
+  margin-top: 0;
   border-top: 1px solid var(--line);
   background: var(--bg0);
   overflow: hidden;
+  scroll-margin-top: 72px;
 }
 
 .ftr-contact-wrap {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 80px 40px;
+  padding-top: var(--space-sec-top);
+  padding-bottom: var(--space-sec-bottom);
+  padding-left: clamp(16px, 3vw, 40px);
+  padding-right: clamp(16px, 3vw, 40px);
 }
 
 .ftr-kicker {
@@ -2755,9 +2715,6 @@ button {
     grid-template-columns: 1fr;
     gap: 40px;
   }
-  .sec-note {
-    display: none;
-  }
 }
 
 @media (max-width: 860px) {
@@ -2855,7 +2812,8 @@ button {
     max-width: 100%;
   }
   .sec {
-    padding-top: 84px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
   .toast-wrap {
     left: 12px;
@@ -3105,37 +3063,6 @@ button {
   margin-left: auto;
 }
 
-.hero-hud-telemetry {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px 12px;
-  border: 1px solid rgba(216, 221, 218, 0.1);
-  background: rgba(9, 11, 12, 0.6);
-  width: 100%;
-}
-
-.hero-hud-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 9px;
-  font-family: var(--font-mono);
-}
-
-.hero-hud-item .label {
-  color: var(--faint);
-}
-
-.hero-hud-item .val {
-  color: #d8ddda;
-  font-weight: 600;
-}
-
-.hero-hud-item .val.highlight {
-  color: var(--phos);
-}
-
 .hero-hud-eq {
   display: flex;
   align-items: flex-end;
@@ -3217,7 +3144,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: clamp(16px, 2vw, 24px);
 }
 
 .radar-controls {
@@ -3355,7 +3282,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 28px;
+  margin-bottom: clamp(16px, 2vw, 22px);
 }
 
 .arsenal-filter-btn {
@@ -3415,7 +3342,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 28px;
+  margin-bottom: clamp(16px, 2vw, 22px);
 }
 
 .vid-filter-btn {
@@ -3924,8 +3851,8 @@ button {
 }
 
 .radar-glyph-svg {
-  width: 48px;
-  height: 48px;
+  width: 144px;
+  height: 144px;
   flex-shrink: 0;
 }
 
@@ -3993,22 +3920,25 @@ button {
 .writing-section {
   position: relative;
   z-index: 10;
-  scroll-margin-top: 80px;
+  scroll-margin-top: 72px;
   border-top: 1px solid var(--line);
   background: rgba(10, 14, 12, 0.72);
-  padding: 100px 0;
+  padding-top: var(--space-sec-top);
+  padding-bottom: var(--space-sec-bottom);
+  padding-left: 0;
+  padding-right: 0;
   color: var(--ink);
 }
 
 .writing-inner {
   width: min(1280px, 100%);
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 clamp(16px, 3vw, 40px);
 }
 
 .writing-list {
   border-bottom: 1px solid var(--line);
-  margin-top: 40px;
+  margin-top: 0;
 }
 
 .writing-row {
@@ -4017,7 +3947,7 @@ button {
   align-items: center;
   gap: 16px;
   border-top: 1px solid var(--line);
-  padding: 22px 14px;
+  padding: clamp(14px, 1.6vw, 18px) 14px;
   text-decoration: none;
   color: inherit;
   transition: background 0.2s, border-color 0.2s;
@@ -4102,7 +4032,7 @@ button {
 }
 
 .writing-foot-note {
-  margin-top: 24px;
+  margin-top: clamp(16px, 2vw, 20px);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -4365,7 +4295,7 @@ button {
   align-items: flex-end;
   gap: 8px;
   height: 72px;
-  margin-bottom: 24px;
+  margin-bottom: clamp(14px, 1.8vw, 20px);
 }
 
 .commit-bar-col {

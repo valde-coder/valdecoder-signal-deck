@@ -1737,26 +1737,16 @@ interface RadarProps {
 }
 
 function Radar({ activeCat, onSelectCat, onSelectSignal }: RadarProps) {
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"recent" | "strength">("recent");
-  const radarRef = useStagger<HTMLElement>([activeCat, search, sortBy]);
+  const radarRef = useStagger<HTMLElement>([activeCat]);
 
   const filtered = useMemo(() => {
-    let list = activeCat === "todos" ? SIGNALS : SIGNALS.filter((s) => s.cat === activeCat);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        (s) =>
-          s.title.toLowerCase().includes(q) ||
-          s.decode.toLowerCase().includes(q) ||
-          s.src.toLowerCase().includes(q)
-      );
-    }
-    if (sortBy === "strength") {
-      return [...list].sort((a, b) => b.str - a.str);
-    }
-    return list;
-  }, [activeCat, search, sortBy]);
+    if (activeCat === "todos") return SIGNALS;
+    return SIGNALS.filter((s) => s.cat === activeCat);
+  }, [activeCat]);
+
+  const displayedSignals = useMemo(() => {
+    return filtered.slice(0, 4);
+  }, [filtered]);
 
   const countFor = (id: Cat | "todos") =>
     id === "todos" ? SIGNALS.length : SIGNALS.filter((signal) => signal.cat === id).length;
@@ -1776,17 +1766,17 @@ function Radar({ activeCat, onSelectCat, onSelectSignal }: RadarProps) {
   return (
     <section className="sec radar-backup" id="radar" ref={radarRef}>
       <div className="radar-section-head rv">
-        <div className="radar-head-rule">
-          <span>01 /</span>
-          <i />
-          <small>a notícia é só o ponto de partida — testes e código são o conteúdo</small>
+        <div className="radar-title-row">
+          <h2>
+            Radar <em>ValdeCoder</em>
+          </h2>
+          <div className="radar-glyph-wrap" role="img" aria-label="Radar ValdeCoder">
+            <RadarGlyph className="radar-glyph-svg" />
+          </div>
         </div>
-        <h2>
-          Radar <em>ValdeCoder</em>
-        </h2>
       </div>
 
-      {/* Barra de Filtros e Busca */}
+      {/* Filtros por categoria */}
       <div className="radar-toolbar-row rv">
         <div className="radar-filters">
           {CATS.map((item) => (
@@ -1799,59 +1789,16 @@ function Radar({ activeCat, onSelectCat, onSelectSignal }: RadarProps) {
             </button>
           ))}
         </div>
-
-        <div className="radar-controls">
-          {/* Radar Glyph animado com varredura contínua */}
-          <div className="radar-glyph-wrap" title="Varredura de radar contínua ativa">
-            <RadarGlyph className="radar-glyph-svg" />
-            <span className="font-mono text-[9.5px] uppercase leading-tight tracking-[0.2em] hidden sm:inline-block">
-              varredura
-              <br />
-              contínua
-            </span>
-          </div>
-
-          {/* Campo de Busca */}
-          <div className="radar-search-wrap">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              placeholder="filtrar sinais..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Buscar sinais no radar"
-            />
-            {search && (
-              <button className="radar-search-clear" onClick={() => setSearch("")} aria-label="Limpar busca">
-                ✕
-              </button>
-            )}
-          </div>
-
-          {/* Ordenação */}
-          <select
-            className="radar-sort-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as "recent" | "strength")}
-            aria-label="Ordenar sinais"
-          >
-            <option value="recent">Mais Recentes</option>
-            <option value="strength">Maior Força (5★)</option>
-          </select>
-        </div>
       </div>
 
       {/* Grid de Cards de Sinais */}
       <div className="radar-card-grid">
-        {filtered.map((s, i) => (
+        {displayedSignals.map((s, i) => (
           <article
             className="radar-card rv"
             data-tone={toneFor(s)}
             key={s.title}
-            style={{ transitionDelay: `${(i % 6) * 0.07}s` }}
+            style={{ transitionDelay: `${(i % 4) * 0.07}s` }}
             onClick={() => onSelectSignal(s)}
             role="button"
             tabIndex={0}
@@ -1894,10 +1841,8 @@ function Radar({ activeCat, onSelectCat, onSelectSignal }: RadarProps) {
 
       {filtered.length === 0 && (
         <div className="radar-empty-state">
-          <p>Nenhum sinal encontrado para o filtro "{search}".</p>
-          <button onClick={() => { setSearch(""); onSelectCat("todos"); }}>
-            Limpar filtros e ver todos os sinais
-          </button>
+          <p>Nenhum sinal encontrado para esta categoria.</p>
+          <button onClick={() => onSelectCat("todos")}>Ver todos os sinais</button>
         </div>
       )}
 
@@ -2031,17 +1976,11 @@ function Arsenal({ onSelectProject }: ArsenalProps) {
   return (
     <section className="sec" id="arsenal">
       <div className="sec-head">
-        <div>
-          <span className="sec-idx">02 // arsenal aberto</span>
-          <h2 className="sec-title">
-            <Scramble text="CÓDIGO QUE" />
-            <br />
-            <Scramble text="ESCAPOU DO DECK" />
-          </h2>
-        </div>
-        <p className="sec-note">
-          Projetos open source nascidos de necessidades reais. Cada card é auditável no GitHub com licenças abertas.
-        </p>
+        <h2 className="sec-title">
+          <Scramble text="CÓDIGO QUE" />
+          <br />
+          <Scramble text="ESCAPOU DO DECK" />
+        </h2>
       </div>
 
       {/* Filtros por linguagem */}
@@ -2207,17 +2146,11 @@ function Transmissions({ onPlay }: { onPlay: (v: Video) => void }) {
   return (
     <section className="sec" id="transmissoes">
       <div className="sec-head">
-        <div>
-          <span className="sec-idx">03 // transmissões</span>
-          <h2 className="sec-title">
-            <Scramble text="AO VIVO DO" />
-            <br />
-            <Scramble text="BANCO DE DADOS" />
-          </h2>
-        </div>
-        <p className="sec-note">
-          Talks, deep dives e streams gravadas direto da bancada do deck.
-        </p>
+        <h2 className="sec-title">
+          <Scramble text="AO VIVO DO" />
+          <br />
+          <Scramble text="BANCO DE DADOS" />
+        </h2>
       </div>
 
       <div className="vid-filter-row rv">
@@ -2365,11 +2298,6 @@ function Writing() {
     <section className="writing-section" id="textos" ref={ref}>
       <div className="writing-inner">
         <div className="radar-section-head rv">
-          <div className="radar-head-rule">
-            <span>04 /</span>
-            <i />
-            <small>quando o experimento termina, a conclusão vira texto</small>
-          </div>
           <h2>
             Textos &amp; <em>notas de bancada</em>
           </h2>
@@ -2433,11 +2361,6 @@ function Lab() {
     <section className="lab-section" id="lab" ref={ref}>
       <div className="lab-inner">
         <div className="radar-section-head rv">
-          <div className="radar-head-rule">
-            <span>05 /</span>
-            <i />
-            <small>o que estou estudando, lendo e medindo nesta semana</small>
-          </div>
           <h2>
             Na <em>bancada</em> agora
           </h2>
@@ -2553,11 +2476,6 @@ function About() {
     <section className="about-backup" id="sobre">
       <div className="about-backup-inner" ref={aboutRef}>
         <div className="about-head rv">
-          <div className="about-head-line">
-            <span>06 /</span>
-            <i />
-            <small>identidade, stack e a linha do tempo até aqui</small>
-          </div>
           <h2>Quem está atrás do <em>radar</em></h2>
         </div>
 

@@ -33,26 +33,6 @@ function scrambleText(el: HTMLElement, text: string, reduced: boolean): () => vo
   return () => window.clearInterval(iv);
 }
 
-function useHeroClock() {
-  const formatter = useMemo(
-    () =>
-      new Intl.DateTimeFormat("pt-BR", {
-        timeZone: "America/Sao_Paulo",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }),
-    [],
-  );
-  const [clock, setClock] = useState(() => formatter.format(new Date()));
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setClock(formatter.format(new Date())), 1000);
-    return () => window.clearInterval(timer);
-  }, [formatter]);
-
-  return clock;
-}
 
 export interface HeroStageProps {
   onSelectCategory?: (cat: string) => void;
@@ -69,7 +49,6 @@ export default function HeroStage({
 }: HeroStageProps) {
   const root = useRef<HTMLElement>(null);
   const titleBoxRef = useRef<HTMLHeadingElement>(null);
-  const clock = useHeroClock();
   const [pulseCount, setPulseCount] = useState(0);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
 
@@ -254,24 +233,6 @@ export default function HeroStage({
           <span className="hero-hud-badge">ONLINE</span>
         </div>
         
-        <div className="hero-hud-telemetry">
-          <div className="hero-hud-item">
-            <span className="label">NÓ:</span>
-            <span className="val">curitiba-edge-01</span>
-          </div>
-          <div className="hero-hud-item">
-            <span className="label">LATÊNCIA:</span>
-            <span className="val">9ms · 60fps</span>
-          </div>
-          <div className="hero-hud-item">
-            <span className="label">SINAL:</span>
-            <span className="val highlight">ESTÁVEL (99.8%)</span>
-          </div>
-          <div className="hero-hud-item">
-            <span className="label">HORA BRT:</span>
-            <time className="val">{clock}</time>
-          </div>
-        </div>
 
         {/* Mini equalizador de sinal */}
         <div className="hero-hud-eq" aria-hidden="true">
