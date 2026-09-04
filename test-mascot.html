@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Ox-α 3D Mascot Multi-Angle Review</title>
+  <style>
+    body {
+      margin: 0;
+      background: #090b0c;
+      color: #e9fbf3;
+      font-family: monospace;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-size: 16px;
+      letter-spacing: 0.2em;
+      color: #63f2a5;
+      margin-bottom: 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 320px);
+      gap: 20px;
+    }
+    .view-card {
+      border: 1px solid #17604e;
+      background: #0c1412;
+      padding: 12px;
+      text-align: center;
+      border-radius: 6px;
+    }
+    .view-card span {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: #8fae9f;
+      margin-bottom: 8px;
+    }
+    canvas {
+      width: 280px;
+      height: 280px;
+      border-radius: 4px;
+      background: #060908;
+    }
+  </style>
+</head>
+<body>
+  <h1>// OX-α 3D PROCEDURAL MASCOT REVIEW (IMG2THREEJS)</h1>
+  <div class="grid">
+    <div class="view-card">
+      <span>VISTA 1: FRONTAL</span>
+      <canvas id="canvas-front" width="280" height="280"></canvas>
+    </div>
+    <div class="view-card">
+      <span>VISTA 2: LATERAL DIREITA</span>
+      <canvas id="canvas-side" width="280" height="280"></canvas>
+    </div>
+    <div class="view-card">
+      <span>VISTA 3: TRASEIRA</span>
+      <canvas id="canvas-back" width="280" height="280"></canvas>
+    </div>
+    <div class="view-card">
+      <span>VISTA 4: ISOMÉTRICA (3/4)</span>
+      <canvas id="canvas-iso" width="280" height="280"></canvas>
+    </div>
+    <div class="view-card">
+      <span>VISTA 5: EXPLODIDA (DEBUG3D)</span>
+      <canvas id="canvas-exploded" width="280" height="280"></canvas>
+    </div>
+    <div class="view-card">
+      <span>VISTA 6: EXPRESSIVA (CLIQUE)</span>
+      <canvas id="canvas-happy" width="280" height="280"></canvas>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from "three";
+    import { createOxMascotModel } from "./src/three/createOxMascotModel.ts";
+
+    function setupView(canvasId, cameraPos, exploded = 0, mood = "idle") {
+      const canvas = document.getElementById(canvasId);
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(280, 280);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
+      camera.position.copy(cameraPos);
+      camera.lookAt(0, 0.12, 0);
+
+      const ambient = new THREE.AmbientLight(0xd6f0e6, 1.1);
+      scene.add(ambient);
+      const key = new THREE.DirectionalLight(0xffffff, 1.8);
+      key.position.set(2.5, 3.5, 3.0);
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0x5fe8c3, 0.7);
+      fill.position.set(-2.5, 1.0, 2.0);
+      scene.add(fill);
+      const rim = new THREE.DirectionalLight(0xffc35c, 0.9);
+      rim.position.set(0, 3.0, -2.5);
+      scene.add(rim);
+
+      const model = createOxMascotModel({ exploded: exploded > 0 });
+      if (exploded > 0) model.setExploded(exploded);
+      if (mood !== "idle") model.setMood(mood);
+      scene.add(model.group);
+
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      // 1. Frontal
+      setupView("canvas-front", new THREE.Vector3(0, 0.22, 4.5));
+      // 2. Lateral
+      setupView("canvas-side", new THREE.Vector3(4.5, 0.22, 0));
+      // 3. Traseira
+      setupView("canvas-back", new THREE.Vector3(0, 0.22, -4.5));
+      // 4. Isométrica 3/4
+      setupView("canvas-iso", new THREE.Vector3(2.8, 1.2, 3.5));
+      // 5. Explodida
+      setupView("canvas-exploded", new THREE.Vector3(2.8, 1.2, 3.8), 0.7);
+      // 6. Expressiva
+      setupView("canvas-happy", new THREE.Vector3(0, 0.22, 4.5), 0, "happy");
+    });
+  </script>
+</body>
+</html>

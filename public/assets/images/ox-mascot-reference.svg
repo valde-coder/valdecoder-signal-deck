@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 212" width="400" height="424" role="img" aria-label="ox-alpha mascote idle reference">
+  <defs>
+    <radialGradient id="faceGlow" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="rgba(95,232,195,0.22)" />
+      <stop offset="100%" stop-color="rgba(95,232,195,0)" />
+    </radialGradient>
+  </defs>
+
+  <!-- background / base -->
+  <rect width="100%" height="100%" fill="#090b0c"/>
+
+  <!-- sombra no chão -->
+  <ellipse cx="100" cy="202" rx="46" ry="7" fill="rgba(3, 14, 17, 0.8)" />
+
+  <!-- antena -->
+  <line x1="100" y1="40" x2="100" y2="18" stroke="#17604e" stroke-width="5" stroke-linecap="round" />
+  <circle cx="100" cy="14" r="10" fill="none" stroke="#ffc35c" stroke-width="2" opacity="0.8" />
+  <circle cx="100" cy="14" r="6.5" fill="#ffc35c" />
+
+  <!-- braços -->
+  <g>
+    <path d="M44 100 Q28 92 22 74" stroke="#bfe9db" stroke-width="13" stroke-linecap="round" fill="none" />
+    <circle cx="21" cy="71" r="8" fill="#e9fbf3" stroke="#17604e" stroke-width="3" />
+  </g>
+  <g>
+    <path d="M156 104 Q172 108 178 122" stroke="#bfe9db" stroke-width="13" stroke-linecap="round" fill="none" />
+    <circle cx="179" cy="126" r="8" fill="#e9fbf3" stroke="#17604e" stroke-width="3" />
+  </g>
+
+  <!-- pés -->
+  <rect x="66" y="162" width="26" height="16" rx="8" fill="#bfe9db" stroke="#17604e" stroke-width="3" />
+  <rect x="108" y="162" width="26" height="16" rx="8" fill="#bfe9db" stroke="#17604e" stroke-width="3" />
+
+  <!-- corpo -->
+  <rect x="40" y="38" width="120" height="128" rx="46" fill="#e9fbf3" stroke="#17604e" stroke-width="4" />
+
+  <!-- telinha do rosto -->
+  <rect x="56" y="60" width="88" height="66" rx="26" fill="#0e242c" stroke="#2c6b77" stroke-width="2.5" />
+  <rect x="56" y="60" width="88" height="66" rx="26" fill="url(#faceGlow)" />
+
+  <!-- olhos -->
+  <g>
+    <circle cx="84" cy="90" r="11" fill="rgba(95,232,195,0.25)" />
+    <circle cx="84" cy="90" r="5.6" fill="#5fe8c3" />
+    <circle cx="85.9" cy="88.1" r="1.8" fill="#eaf6f0" />
+  </g>
+  <g>
+    <circle cx="116" cy="90" r="11" fill="rgba(95,232,195,0.25)" />
+    <circle cx="116" cy="90" r="5.6" fill="#5fe8c3" />
+    <circle cx="117.9" cy="88.1" r="1.8" fill="#eaf6f0" />
+  </g>
+
+  <!-- boquinha -->
+  <path d="M90 108 Q100 115 110 108" stroke="#5fe8c3" stroke-width="3" stroke-linecap="round" fill="none" />
+
+  <!-- blush -->
+  <circle cx="64" cy="136" r="6" fill="#ff8a68" opacity="0.45" />
+  <circle cx="136" cy="136" r="6" fill="#ff8a68" opacity="0.45" />
+
+  <!-- badge ox-alpha -->
+  <rect x="76" y="132" width="48" height="24" rx="9" fill="#5fe8c3" stroke="#17604e" stroke-width="2.5" />
+  <text x="100" y="149" text-anchor="middle" font-family="'Space Grotesk', monospace" font-weight="700" font-size="13" fill="#0e242c">ox-α</text>
+</svg>

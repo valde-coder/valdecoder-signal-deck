@@ -1,0 +1,56 @@
+{
+  "subject": "ox-α procedural mascot",
+  "interpretation": "Stylized procedural Three.js character",
+  "triangleBudget": {
+    "min": 8000,
+    "target": 12000,
+    "max": 15000
+  },
+  "hierarchy": {
+    "root": "oxMascotRoot",
+    "pivots": [
+      "headPivot",
+      "bodyPivot",
+      "antennaPivot",
+      "leftArmPivot",
+      "rightArmPivot",
+      "eyesGroup"
+    ]
+  },
+  "features": {
+    "macro": "Chassis capsule silhouette, rounded rectangular body proportions (width:height ~ 1:1.06)",
+    "meso": "Curved dark visor screen, antenna with spherical beacon, articulated arm and foot joints",
+    "micro": "Expressive emissive cyan eyes, blush cheeks, ox-α chest badge, mouth curve"
+  },
+  "materials": {
+    "bodyChassis": {
+      "type": "MeshStandardMaterial",
+      "color": "#e9fbf3",
+      "roughness": 0.28,
+      "metalness": 0.08
+    },
+    "faceScreen": {
+      "type": "MeshStandardMaterial",
+      "color": "#0e242c",
+      "roughness": 0.12,
+      "metalness": 0.35
+    },
+    "antennaBeacon": {
+      "type": "MeshStandardMaterial",
+      "color": "#ffc35c",
+      "emissive": "#ff9824",
+      "emissiveIntensity": 1.5
+    },
+    "eyes": {
+      "type": "MeshStandardMaterial",
+      "color": "#5fe8c3",
+      "emissive": "#5fe8c3",
+      "emissiveIntensity": 1.8
+    }
+  },
+  "interactions": {
+    "pointerTracking": "Subtle lookAt clamped to max 8 degrees",
+    "clickAcknowledgment": "Head nod, antenna flex, wave gesture via GSAP",
+    "debugExploded": "Inspection mode triggered via ?debug3d=1 or options.exploded"
+  }
+}

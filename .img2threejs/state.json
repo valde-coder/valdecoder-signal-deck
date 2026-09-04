@@ -1,0 +1,23 @@
+{
+  "version": "1.5.1",
+  "profile": "stylized_character",
+  "subject": "ox-alpha-mascot",
+  "referenceImage": "public/assets/images/ox-mascot-reference.png",
+  "interpretation": "Stylized 3D procedural robotic companion (ox-α), faithful to the 2D SVG silhouette, proportions, and color palette.",
+  "status": "in_progress",
+  "passes": [
+    { "id": "blockout", "status": "completed" },
+    { "id": "structure", "status": "completed" },
+    { "id": "form", "status": "completed" },
+    { "id": "materials", "status": "completed" },
+    { "id": "interaction", "status": "completed" },
+    { "id": "optimization", "status": "completed" }
+  ],
+  "gates": {
+    "qualityContract": true,
+    "budgetVerified": true,
+    "explodableHierarchy": true,
+    "semanticPivots": true,
+    "reducedMotionFallback": true
+  }
+}

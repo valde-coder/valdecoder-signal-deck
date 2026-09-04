@@ -1,11 +1,17 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HeroStage from "./components/HeroStage";
+import OxMascot from "./components/OxMascot";
+import Projects from "./components/Projects";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { useModalA11y } from "./hooks/useModalA11y";
+import { MOTION } from "./lib/motionTokens";
+
+const OxMascot3D = lazy(() => import("./components/OxMascot3D"));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -152,6 +158,7 @@ void main() {
 /* ---------------- cena WebGL contínua de alta performance ---------------- */
 
 interface SceneApi {
+  setActive(active: boolean): void;
   setFx(fx: FxSettings): void;
   setGod(on: boolean): void;
   pulse(): void;
@@ -270,13 +277,23 @@ function initScene(
     composer.setSize(w, h);
   };
 
+  const onVisibilityChange = () => {
+    if (!document.hidden && !raf) {
+      raf = requestAnimationFrame(frame);
+    }
+  };
+
   window.addEventListener("pointermove", onMove);
   document.documentElement.addEventListener("pointerleave", onLeave);
   window.addEventListener("resize", onResize);
+  document.addEventListener("visibilitychange", onVisibilityChange);
 
   const frame = (timestamp: number) => {
+    if (document.hidden) {
+      raf = 0;
+      return;
+    }
     raf = requestAnimationFrame(frame);
-    if (document.hidden) return;
     timer.update(timestamp);
     const dt = Math.min(timer.getDelta(), 0.05);
     uniforms.uTime.value = timer.getElapsed();
@@ -304,6 +321,7 @@ function initScene(
   raf = requestAnimationFrame(frame);
 
   return {
+    setActive() {},
     setFx(next: FxSettings) {
       if (Math.round(next.density) !== Math.round(fx.density)) {
         build(mobile ? Math.min(next.density, 1400) : next.density);
@@ -332,6 +350,7 @@ function initScene(
       window.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       if (geo) geo.dispose();
       mat.dispose();
       bloomPass.dispose();
@@ -1007,74 +1026,48 @@ function Scramble({
   );
 }
 
-/* ---------------- boot ---------------- */
+/* ---------------- boot não-bloqueante (assinatura de 600ms) ---------------- */
 
-function Boot({ onDone }: { onDone: () => void }) {
-  const [lines, setLines] = useState<string[]>([]);
-  const doneRef = useRef(false);
+function BootSignature({ onDone }: { onDone?: () => void }) {
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      setLines(BOOT_LINES);
-      const t = window.setTimeout(onDone, 350);
-      return () => window.clearTimeout(t);
-    }
-    const timers: number[] = [];
-    let li = 0;
-    let ci = 0;
-    const tick = () => {
-      if (doneRef.current) return;
-      const line = BOOT_LINES[li];
-      ci++;
-      setLines((prev) => {
-        const next = [...prev];
-        next[li] = line.slice(0, ci);
-        return next;
-      });
-      if (ci >= line.length) {
-        li++;
-        ci = 0;
-        if (li >= BOOT_LINES.length) {
-          timers.push(window.setTimeout(finish, 380));
-          return;
-        }
-        timers.push(window.setTimeout(tick, 70));
-      } else {
-        timers.push(window.setTimeout(tick, 6));
-      }
-    };
-    const finish = () => {
-      if (!doneRef.current) {
-        doneRef.current = true;
-        onDone();
-      }
-    };
-    timers.push(window.setTimeout(tick, 150));
-    return () => timers.forEach((t) => window.clearTimeout(t));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const t = window.setTimeout(() => {
+      setVisible(false);
+      onDone?.();
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [onDone]);
+
+  if (!visible) return null;
 
   return (
-    <div className="boot" onClick={onDone} role="button" aria-label="pular introdução">
-      <div className="boot-box">
-        <p className="boot-title">V//D</p>
-        {lines.map((l, idx) => (
-          <div key={idx} className="boot-line">
-            {l.includes("ok") ? (
-              <>
-                {l.replace("ok", "")}
-                <span className="ok">ok</span>
-              </>
-            ) : (
-              l
-            )}
-          </div>
-        ))}
-        <button className="boot-skip" type="button">
-          pular boot ⏎
-        </button>
-      </div>
+    <div
+      className="boot-signature"
+      style={{
+        position: "fixed",
+        top: "16px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 9999,
+        pointerEvents: "none",
+        background: "rgba(9, 11, 12, 0.92)",
+        border: "1px solid var(--phos)",
+        borderRadius: "4px",
+        padding: "6px 16px",
+        fontFamily: "var(--font-mono)",
+        fontSize: "11px",
+        letterSpacing: "0.14em",
+        color: "var(--phos)",
+        boxShadow: "0 4px 24px rgba(99, 242, 165, 0.2)",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+      }}
+      aria-live="polite"
+    >
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--phos)", boxShadow: "0 0 8px var(--phos)" }} />
+      <span>VALDECODER OS // DECK ONLINE</span>
     </div>
   );
 }
@@ -1086,7 +1079,14 @@ function Cursor() {
   const ringRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (
+      !window.matchMedia("(pointer: fine)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0
+    ) {
+      return;
+    }
     document.body.classList.add("vd-fine");
     let x = window.innerWidth / 2;
     let y = window.innerHeight / 2;
@@ -1371,6 +1371,15 @@ export default function App() {
       "background:#63f2a5;color:#04140b;font-weight:bold;padding:4px 8px;",
       "color:#8fae9f;"
     );
+
+    // Suporte a deep-link por hash (#radar, #arsenal, etc.)
+    if (window.location.hash) {
+      const id = window.location.hash.slice(1);
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: "auto", block: "start" });
+      }
+    }
   }, []);
 
   const toggleCrt = () => {
@@ -1402,9 +1411,13 @@ export default function App() {
 
   return (
     <div className={crt ? "crt-on" : undefined}>
+      <a href="#main-content" className="skip-link">
+        Pular para o conteúdo principal
+      </a>
+
       {particlesActive && <canvas ref={canvasRef} className="gl-canvas" aria-hidden="true" />}
 
-      {!booted && <Boot onDone={() => setBooted(true)} />}
+      <BootSignature onDone={() => setBooted(true)} />
 
       <Cursor />
       <Toasts />
@@ -1422,29 +1435,27 @@ export default function App() {
         onOpenCmd={() => setCmdOpen(true)}
       />
 
-      {booted && (
-        <main>
-          <div className="hero-fold" ref={heroFoldRef}>
-            <HeroStage
-              onSelectCategory={(c) => setRadarFilterCat(c as Cat)}
-              onOpenCommandPalette={() => setCmdOpen(true)}
-              onPlayFeaturedVideo={() => setModalVid(VIDEOS[0])}
-              onSignalPulse={handlePulse}
-            />
-            <Ticker />
-          </div>
-          <Radar
-            activeCat={radarFilterCat}
-            onSelectCat={(c) => setRadarFilterCat(c)}
-            onSelectSignal={(s) => setSelectedSignal(s)}
+      <main id="main-content">
+        <div className="hero-fold" ref={heroFoldRef}>
+          <HeroStage
+            onSelectCategory={(c) => setRadarFilterCat(c as Cat)}
+            onOpenCommandPalette={() => setCmdOpen(true)}
+            onPlayFeaturedVideo={() => setModalVid(VIDEOS[0])}
+            onSignalPulse={handlePulse}
           />
-          <Arsenal onSelectProject={(p) => setSelectedProject(p)} />
-          <Transmissions onPlay={(v) => setModalVid(v)} />
-          <Writing />
-          <Lab />
-          <About />
-        </main>
-      )}
+          <Ticker />
+        </div>
+        <Radar
+          activeCat={radarFilterCat}
+          onSelectCat={(c) => setRadarFilterCat(c)}
+          onSelectSignal={(s) => setSelectedSignal(s)}
+        />
+        <Projects />
+        <Transmissions onPlay={(v) => setModalVid(v)} />
+        <Writing />
+        <Lab />
+        <About />
+      </main>
 
       <Footer />
 
@@ -1522,7 +1533,7 @@ function Header({
 
   const links = [
     ["#radar", "radar", "radar"],
-    ["#arsenal", "arsenal", "arsenal"],
+    ["#projetos", "projetos", "projetos"],
     ["#transmissoes", "transmissões", "transmissoes"],
     ["#textos", "textos", "textos"],
     ["#lab", "lab", "lab"],
@@ -1675,20 +1686,13 @@ function Header({
   );
 }
 
-/* ---------------- ticker ---------------- */
+/* ---------------- ticker de telemetria refinado ---------------- */
 
 function Ticker() {
   return (
     <div className="ticker" aria-hidden="true">
       <div className="ticker-row">
         {[...TICKER_A, ...TICKER_A].map((t, i) => (
-          <span className="ticker-item" key={i}>
-            {t} <span className="tk-star">✦</span>
-          </span>
-        ))}
-      </div>
-      <div className="ticker-row rev">
-        {[...TICKER_B, ...TICKER_B].map((t, i) => (
           <span className="ticker-item" key={i}>
             {t} <span className="tk-star">✦</span>
           </span>
@@ -1854,13 +1858,7 @@ function Radar({ activeCat, onSelectCat, onSelectSignal }: RadarProps) {
 /* ---------------- modal de sinal ---------------- */
 
 function SignalDetailModal({ signal, onClose }: { signal: Signal; onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const modalRef = useModalA11y(true, onClose);
 
   const copySignalText = async () => {
     try {
@@ -1872,8 +1870,14 @@ function SignalDetailModal({ signal, onClose }: { signal: Signal; onClose: () =>
   };
 
   return (
-    <div className="modal-ovl" onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog">
-      <div className="modal signal-modal">
+    <div
+      className="modal-ovl"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="signal-modal-title"
+    >
+      <div className="modal signal-modal" ref={modalRef}>
         <button className="modal-x" onClick={onClose} aria-label="fechar">✕</button>
         <div className="signal-modal-head">
           <span className="signal-modal-cat">{signal.cat.toUpperCase()}</span>
@@ -1881,7 +1885,7 @@ function SignalDetailModal({ signal, onClose }: { signal: Signal; onClose: () =>
           <span className="signal-modal-str">Força de Sinal: {signal.str}/5</span>
         </div>
 
-        <h3 className="signal-modal-title">{signal.title}</h3>
+        <h3 id="signal-modal-title" className="signal-modal-title">{signal.title}</h3>
 
         <div className="signal-modal-decode">
           <span className="signal-decode-label">⚡ DECODIFICAÇÃO DIRETA</span>
@@ -1913,125 +1917,12 @@ function SignalDetailModal({ signal, onClose }: { signal: Signal; onClose: () =>
   );
 }
 
-/* ---------------- arsenal ---------------- */
 
-interface ArsenalProps {
-  onSelectProject: (proj: Project) => void;
-}
-
-function Arsenal({ onSelectProject }: ArsenalProps) {
-  const [langFilter, setLangFilter] = useState("todos");
-  const gridRef = useStagger<HTMLDivElement>([langFilter]);
-
-  const langs = useMemo(() => {
-    const s = new Set(PROJECTS.map((p) => p.lang.toLowerCase()));
-    return ["todos", ...Array.from(s)];
-  }, []);
-
-  const filtered = useMemo(() => {
-    if (langFilter === "todos") return PROJECTS;
-    return PROJECTS.filter((p) => p.lang.toLowerCase() === langFilter);
-  }, [langFilter]);
-
-  const handleCopyInstall = async (e: React.MouseEvent, cmd: string) => {
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(cmd);
-      toast(`Comando copiado: ${cmd}`);
-    } catch {
-      toast("Não foi possível copiar.", true);
-    }
-  };
-
-  return (
-    <section className="sec" id="arsenal">
-      <div className="sec-head">
-        <h2 className="sec-title">
-          <Scramble text="CÓDIGO QUE" />
-          <br />
-          <Scramble text="ESCAPOU DO DECK" />
-        </h2>
-      </div>
-
-      {/* Filtros por linguagem */}
-      <div className="arsenal-filters rv">
-        {langs.map((l) => (
-          <button
-            key={l}
-            className={`arsenal-filter-btn ${langFilter === l ? "on" : ""}`}
-            onClick={() => setLangFilter(l)}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-
-      <div className="proj-grid" ref={gridRef}>
-        {filtered.map((p, i) => (
-          <div
-            key={p.name}
-            className="proj rv"
-            style={{ gridColumn: p.span, transitionDelay: `${(i % 3) * 0.08}s` }}
-            onClick={() => onSelectProject(p)}
-            role="button"
-            tabIndex={0}
-          >
-            <span className="corner tl" />
-            <span className="corner tr" />
-            <span className="corner bl" />
-            <span className="corner br" />
-
-            <div className="proj-top">
-              <span className="proj-glyph">
-                <Glyph i={p.glyph} />
-              </span>
-              <span className={`proj-status ${p.status}`}>{p.status}</span>
-            </div>
-
-            <h3 className="proj-name">{p.name}</h3>
-            <p className="proj-tag">{p.tag}</p>
-
-            <div className="proj-stack">
-              {p.stack.map((s) => (
-                <span className="stack-chip" key={s}>
-                  {s}
-                </span>
-              ))}
-            </div>
-
-            <div className="proj-meta">
-              <span className="proj-lang">
-                <i style={{ background: p.langColor }} />
-                {p.lang}
-              </span>
-              <span className="proj-star">★ {p.stars}</span>
-              <span>⑂ {p.forks}</span>
-              
-              <button
-                className="proj-copy-cmd"
-                onClick={(e) => handleCopyInstall(e, p.installCmd)}
-                title={`Copiar: ${p.installCmd}`}
-              >
-                <code>{p.installCmd.slice(0, 18)}…</code> ⧉
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 /* ---------------- modal de projeto ---------------- */
 
 function ProjectDetailModal({ project, onClose }: { project: Project; onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const modalRef = useModalA11y(true, onClose);
 
   const copyInstall = async () => {
     try {
@@ -2043,8 +1934,14 @@ function ProjectDetailModal({ project, onClose }: { project: Project; onClose: (
   };
 
   return (
-    <div className="modal-ovl" onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog">
-      <div className="modal proj-modal">
+    <div
+      className="modal-ovl"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="project-modal-title"
+    >
+      <div className="modal proj-modal" ref={modalRef}>
         <button className="modal-x" onClick={onClose} aria-label="fechar">✕</button>
         <div className="proj-modal-head">
           <span className="proj-modal-status" style={{ borderColor: project.langColor, color: project.langColor }}>
@@ -2053,7 +1950,7 @@ function ProjectDetailModal({ project, onClose }: { project: Project; onClose: (
           <span className="proj-modal-stars">★ {project.stars} · ⑂ {project.forks} forks</span>
         </div>
 
-        <h3 className="proj-modal-title">{project.name}</h3>
+        <h3 id="project-modal-title" className="proj-modal-title">{project.name}</h3>
         <p className="proj-modal-desc">{project.tag}</p>
 
         <div className="proj-modal-cmd-box">
@@ -2163,13 +2060,7 @@ function Transmissions({ onPlay }: { onPlay: (v: Video) => void }) {
 }
 
 function VideoModal({ vid, onClose }: { vid: Video; onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const modalRef = useModalA11y(true, onClose);
 
   return (
     <div
@@ -2179,25 +2070,18 @@ function VideoModal({ vid, onClose }: { vid: Video; onClose: () => void }) {
       }}
       role="dialog"
       aria-modal="true"
-      aria-label={vid.title}
+      aria-labelledby="video-modal-title"
     >
-      <div className="modal video-player-modal">
+      <div className="modal video-player-modal" ref={modalRef}>
         <button className="modal-x" onClick={onClose} aria-label="fechar">
           ✕
         </button>
         <p className="modal-tag">▸ sintonizando canal… // {vid.tagv.toUpperCase()}</p>
-        <h3>{vid.title}</h3>
+        <h3 id="video-modal-title">{vid.title}</h3>
 
-        <div className="eq" aria-hidden="true">
-          {Array.from({ length: 24 }).map((_, i) => (
-            <i
-              key={i}
-              style={{
-                animationDelay: `${(i % 6) * 0.09}s`,
-                animationDuration: `${0.7 + (i % 5) * 0.12}s`,
-              }}
-            />
-          ))}
+        <div className="video-player-status" style={{ display: "flex", alignItems: "center", gap: "10px", margin: "14px 0", fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--phos)" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--phos)" }} />
+          <span>TRANSMISSÃO CONECTADA // 1080P60 // {vid.dur}</span>
         </div>
 
         {vid.takeaway && (
@@ -2429,6 +2313,22 @@ function Lab() {
                 <p className="lab-stat-lbl">issues fechadas</p>
               </div>
             </div>
+          </div>
+
+          {/* Card 4: ox-α Mascote de Bancada 3D */}
+          <div className="lab-card lab-mascot-card rv" style={{ transitionDelay: "0.25s", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+            <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <p className="lab-card-title" style={{ color: "var(--phos)", margin: 0 }}>
+                <i /> Mascote de bancada
+              </p>
+              <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-faint">procedural 3d</span>
+            </div>
+            <Suspense fallback={<OxMascot mood="idle" size={200} />}>
+              <OxMascot3D size={210} />
+            </Suspense>
+            <p style={{ marginTop: "10px", fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--dim)" }}>
+              ox-α · monitora sinais e responde ao clique
+            </p>
           </div>
         </div>
       </div>
@@ -2679,56 +2579,7 @@ function FxPanel({
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [footerVisible, setFooterVisible] = useState(false);
-  const [open, setOpen] = useState(
-    () => typeof window === "undefined" || window.innerWidth >= 860
-  );
-
-  useEffect(() => {
-    const footer = document.getElementById("contato");
-    if (!footer) return;
-
-    const syncFooterVisibility = () => {
-      const rect = footer.getBoundingClientRect();
-      setFooterVisible(rect.top < window.innerHeight && rect.bottom > 0);
-    };
-
-    syncFooterVisibility();
-    window.addEventListener("scroll", syncFooterVisibility, { passive: true });
-    window.addEventListener("resize", syncFooterVisibility);
-    return () => {
-      window.removeEventListener("scroll", syncFooterVisibility);
-      window.removeEventListener("resize", syncFooterVisibility);
-    };
-  }, []);
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 860px)");
-    let currentDesktop = media.matches;
-    let resizeFrame = 0;
-    const sync = () => {
-      const nextDesktop = media.matches;
-      if (nextDesktop === currentDesktop) return;
-      currentDesktop = nextDesktop;
-      setOpen(nextDesktop);
-    };
-
-    setOpen(currentDesktop);
-    media.addEventListener("change", sync);
-    const onResize = () => {
-      sync();
-      if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
-      resizeFrame = window.requestAnimationFrame(() => {
-        resizeFrame = 0;
-        sync();
-      });
-    };
-    window.addEventListener("resize", onResize);
-    return () => {
-      if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
-      media.removeEventListener("change", sync);
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const panel = panelRef.current;
@@ -2879,22 +2730,18 @@ function CommandPaletteModal({
   onNavigate: (id: string) => void;
   onToggleCrt: () => void;
   onToggleGod: () => void;
-  onPreset: (p: string) => void;
+  onPreset: (k: string) => void;
   onSelectSignal: (s: Signal) => void;
   onSelectProject: (p: Project) => void;
   onSelectVideo: (v: Video) => void;
 }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useModalA11y(true, onClose);
 
   useEffect(() => {
     inputRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, []);
 
   const q = query.toLowerCase().trim();
 
@@ -2928,8 +2775,14 @@ function CommandPaletteModal({
   }, [q]);
 
   return (
-    <div className="modal-ovl cmd-ovl" onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog">
-      <div className="modal cmd-palette">
+    <div
+      className="modal-ovl cmd-ovl"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Terminal de Comandos e Busca"
+    >
+      <div className="modal cmd-palette" ref={modalRef}>
         <div className="cmd-input-bar">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8" />
